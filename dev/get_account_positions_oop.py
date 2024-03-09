@@ -25,9 +25,6 @@ class GetAccountPosition:
             if _account == self.account:
                 is_account = True
 
-        # try:
-        #     if is_account:
-        #         pass
         
         if not is_account:
             print(f'Account : {self.account}  is not available!')
