@@ -62,31 +62,37 @@ if __name__ == '__main__':
     # with open ('data.txt', 'a') as f:
     #     f.write(str(text))
     #     f.write(' \n')
-        if text == "купить":
-            portfolio.open_positions(['SBER', 'PIKK' ], 0.17)
-            
 
-        elif text == "купить лукойл":
-            portfolio.open_positions(['LKOH', ], 0.15),
+        match text:
+
+            case "купить" | "купи":
+                portfolio.open_positions(['SBER', 'PIKK' ], 35, 250)
+                
+
+            case "купить лукойл":
+                portfolio.open_positions(['LKOH', ], 45, 155),
     
 
-        elif text == "показать портфель":
-            portfolio.close_connection
-            portfolio_info = GetAccountPosition() 
-            portfolio_info.get_cash()
-            portfolio_info.build_table_positions()
-            portfolio_info.get_positions()
-            portfolio_info.get_portfolios_with_account_value()
-            portfolio_info.get_portfolios_as_percentage()
+            case "показать портфель":
+                portfolio.close_connection
+                portfolio_info = GetAccountPosition() 
+                portfolio_info.get_cash()
+                portfolio_info.build_table_positions()
+                portfolio_info.get_positions()
+                portfolio_info.get_portfolios_with_account_value()
+                portfolio_info.get_portfolios_as_percentage()
 
-            #print(TablePositions.rows)
-            app = TableApp()
-            app.run()
-            portfolio_info.close_connection()
+                #print(TablePositions.rows)
+                app = TableApp()
+                app.run()
+                portfolio_info.close_connection()
 
-        elif text == "продать":
-            pass
+            case "продать":
+                pass
 
-        elif text == "выход":
-            portfolio.close_connection()
-            quit()
+            case "выход":
+                portfolio.close_connection()
+                quit()
+
+            case _:
+                print('Команда не опознана')

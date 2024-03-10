@@ -68,8 +68,8 @@ class TransactionUnit:
 
 
     def quik_api_send_async_transaction(self, ticker, client_code, operation, quantity, price):
-
-        # transaction_string = b"ACTION=NEW_ORDER; TRANS_ID=888; CLASSCODE=TQBR; SECCODE=SIBN; ACCOUNT=L01-00000F00; CLIENT_CODE=2007693; TYPE=L; OPERATION=B; QUANTITY=25; PRICE=825;"
+        """"""
+        # transaction_string = b"ACTION=NEW_ORDER; TRANS_ID=777; CLASSCODE=TQBR; SECCODE=SIBN; ACCOUNT=L01-00000F00; CLIENT_CODE=2007693; TYPE=L; OPERATION=B; QUANTITY=25; PRICE=825;"
         self.transaction_string = "ACTION=NEW_ORDER; TRANS_ID=777; CLASSCODE=TQBR; "
         seccode_string = "SECCODE=" + str(ticker) + "; "
         self.transaction_string = self.transaction_string + seccode_string
@@ -97,7 +97,7 @@ class TransactionUnit:
 
 
     def get_account_total_value(self, account):
-        """ """
+        """ Getting the cash position and total value of account """
         for _accounts_cash in self.accounts_cash:
             if ((_accounts_cash.get('client_code') == account) and (_accounts_cash.get('limit_kind') == 2)
                         and (_accounts_cash.get('tag')=='EQTV') and (_accounts_cash.get('currcode')=='SUR')):
@@ -111,7 +111,8 @@ class TransactionUnit:
         return cash, total_account_value
 
 
-    def open_positions(self, tickers, percentage):
+    def open_positions(self, tickers, min_qauntity=1, max_quantity=100):
+
 
         _tickers = tickers
         _percentage = percentage
@@ -119,7 +120,7 @@ class TransactionUnit:
         for _account in self.accounts:
             cash, total_account_value = self.get_account_total_value(_account)
             for _position in _tickers:
-                quantity = random.randint(35, 245)
+                quantity = random.randint(min_qauntity, max_quantity)
                 last_price = float(self.quik_provider.GetParamEx(self.class_code, _position, 'LAST')['data']['param_value'])
                 # for position in self.depo_limits:
                 #     if (position.get('client_code') == _account and position.get('limit_kind') == 2):
@@ -140,6 +141,7 @@ class TransactionUnit:
                         self.quik_api_send_async_transaction(_position.get('sec_code'), _account, 'S', int(_position.get('currentbal')), last_price)
 
     def close_some_positions(self, tickers):
+
         _tickers = tickers
         for _account in self.accounts:
             for _position in _tickers:
@@ -149,7 +151,7 @@ class TransactionUnit:
                         self.quik_api_send_async_transaction(_position.get('sec_code'), _account, 'S', int(_position.get('currentbal')), last_price)
                         time.sleep(0.02)
 
-    def reduce_some_positions(self):
+    def reduce_some_positions(self, tickers):
         pass
 
     def format_price(self, ticker, price):
