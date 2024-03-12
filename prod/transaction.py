@@ -10,7 +10,17 @@ import os
 import sys
 
 sys.path.insert(1, os.path.join(sys.path[0], "../QuikPy"))
+sys.path.insert(1, os.path.join(sys.path[0], "../.."))
+
 from QuikPy import QuikPy  # Working with QUIK from Python via QuikSharp LUA scripts
+
+from backtrader_moexalgo.moexalgo_store import MoexAlgoStore  # Storage AlgoPack
+
+
+
+# from BackTraderQuik.QKStore import QKStore  # Хранилище QUIK
+
+
 
 class Trans2Quik:
 
@@ -38,10 +48,13 @@ class Trans2Quik:
 
 class TransactionUnit:
     
-    def __init__(self, accounts):
+    def __init__(self, class_code, accounts ):
         
         self.quik_provider = QuikPy()
-        self.class_code = 'TQBR'
+        self.class_code = class_code
+        self.ticker_prefix = class_code + '.'
+
+        self.store = MoexAlgoStore()
 
         self.accounts = accounts
         self.depo_limits = self.quik_provider.GetAllDepoLimits()['data']
@@ -67,12 +80,13 @@ class TransactionUnit:
         print("error = ", self.lpstrErrorMessage.value,"\n")
 
 
-    def quik_api_send_async_transaction(self, ticker, client_code, operation, quantity, price):
-        """"""
+    def quik_api_send_async_transaction(self, classcode, seccode, client_code, operation, quantity, price):
+        """ """
         # transaction_string = b"ACTION=NEW_ORDER; TRANS_ID=777; CLASSCODE=TQBR; SECCODE=SIBN; ACCOUNT=L01-00000F00; CLIENT_CODE=2007693; TYPE=L; OPERATION=B; QUANTITY=25; PRICE=825;"
-        self.transaction_string = "ACTION=NEW_ORDER; TRANS_ID=777; CLASSCODE=TQBR; "
-        seccode_string = "SECCODE=" + str(ticker) + "; "
-        self.transaction_string = self.transaction_string + seccode_string
+        self.transaction_string = "ACTION=NEW_ORDER; TRANS_ID=777; "
+        classcode_string = "CLASSCODE=" + str(classcode) + "; "
+        seccode_string = "SECCODE=" + str(seccode) + "; "
+        self.transaction_string = self.transaction_string + classcode_string + seccode_string
         account_string = "ACCOUNT=L01-00000F00; " # for BCS broker
         client_code_string = "CLIENT_CODE=" + str(client_code)+"; "
         self.transaction_string = self.transaction_string + account_string + client_code_string
@@ -96,6 +110,21 @@ class TransactionUnit:
         print("error = ", self.lpstrErrorMessage.value,"\n")
 
 
+    def info_ticker(self, ticker, ticker_prefix):
+        """Функция для получения информации по тикерам"""
+        info = {}
+        i = self.store.get_symbol_info(ticker)
+        info[f"{ticker_prefix}{ticker}"] = i
+        return info
+
+    
+    def lot_info(self, ticker):
+
+        lot = self.info_ticker(ticker, 'TQBR.')[ticker]['securities']['LOTSIZE']
+        return lot
+
+
+
     def get_account_total_value(self, account):
         """ Getting the cash position and total value of account """
         for _accounts_cash in self.accounts_cash:
@@ -111,49 +140,63 @@ class TransactionUnit:
         return cash, total_account_value
 
 
-    def open_positions(self, tickers, min_qauntity=1, max_quantity=100):
+    def open_positions_random_qauntity(self, tickers, min_qauntity=1, max_quantity=100):
 
-
-        _tickers = tickers
-        _percentage = percentage
-        t0 = time.time()
         for _account in self.accounts:
             cash, total_account_value = self.get_account_total_value(_account)
-            for _position in _tickers:
+            for _position in tickers:
+                info = self.info_tickers(_position, self.ticker_prefix)
                 quantity = random.randint(min_qauntity, max_quantity)
+                quantity_lots = int(_position.get('currentbal') * info[str(self.ticker_prefix + _position.get('sec_code'))]['securities']['LOTSIZE'])
                 last_price = float(self.quik_provider.GetParamEx(self.class_code, _position, 'LAST')['data']['param_value'])
                 # for position in self.depo_limits:
                 #     if (position.get('client_code') == _account and position.get('limit_kind') == 2):
                 #         current_position = position.get('currentbal') * last_price
                 # print(current_position)
-                if (cash > (quantity * last_price)):
-                    self.quik_api_send_async_transaction(_position, _account, 'B', quantity, last_price)
+                if (cash > (quantity_lots * last_price)):
+
+                    self.quik_api_send_async_transaction(self.class_code, _position, _account, 'B', quantity_lots, last_price)
                     time.sleep(0.02)
+
+    def open_positions_fix_qauntity(self, tickers, qauntity=1):
+        pass
+
+
 
 
     def close_all_positions(self):
-
+        
         for _account in self.accounts:
             for _position in self.depo_limits:
                 if (_position.get('client_code') == _account and _position.get('limit_kind') == 2 and int(_position.get('currentbal')) > 0):
                         last_price = float(self.quik_provider.GetParamEx(self.class_code, _position.get('sec_code'), 'LAST')['data']['param_value'])
-
-                        self.quik_api_send_async_transaction(_position.get('sec_code'), _account, 'S', int(_position.get('currentbal')), last_price)
+                        info = self.info_tickers(_position, self.ticker_prefix)
+                        quantity = int(_position.get('currentbal') / info[str(self.ticker_prefix + _position.get('sec_code'))]['securities']['LOTSIZE'])
+                        self.quik_api_send_async_transaction(self.class_code, _position.get('sec_code'), _account, 'S', int(_position.get('currentbal')), last_price)
 
     def close_some_positions(self, tickers):
 
-        _tickers = tickers
+        #print(info)
+        #print(tickers) 
         for _account in self.accounts:
-            for _position in _tickers:
-                if (_position.get('client_code') == _account and _position.get('limit_kind') == 2 and int(_position.get('currentbal')) > 0):
-                        last_price = float(self.quik_provider.GetParamEx(self.class_code, _position.get('sec_code'), 'LAST')['data']['param_value'])
+            
+            for _position in self.depo_limits:
+                #print(_position)
 
-                        self.quik_api_send_async_transaction(_position.get('sec_code'), _account, 'S', int(_position.get('currentbal')), last_price)
-                        time.sleep(0.02)
+                if (_position.get('client_code') == _account and _position.get('limit_kind') == 2 and int(_position.get('currentbal'))> 0):
+                        last_price = float(self.quik_provider.GetParamEx(self.class_code, _position.get('sec_code'), 'LAST')['data']['param_value'])
+                        info = self.info_tickers(_position, self.ticker_prefix)
+                        quantity = int(_position.get('currentbal') / info[str(self.ticker_prefix + _position.get('sec_code'))]['securities']['LOTSIZE'])
+                        self.quik_api_send_async_transaction(self.class_code, _position.get('sec_code'), _account, 'S', quantity, last_price)
+                        time.sleep(0.05)
+
 
     def reduce_some_positions(self, tickers):
         pass
 
+    
+    
+    
     def format_price(self, ticker, price):
         """
         The function of rounding up the price step by keeping the signs of decimal places
@@ -161,6 +204,7 @@ class TransactionUnit:
         """
         step = self.p.info_tickers[ticker]['securities']['MINSTEP']  # we keep the minimum price step
         signs = self.p.info_tickers[ticker]['securities']['DECIMALS']  # we keep the number of decimal places
+        
 
         val = round(price / step) * step
         return float(("{0:." + str(signs) + "f}").format(val))
@@ -168,4 +212,3 @@ class TransactionUnit:
         
     def close_connection(self):
         self.quik_provider.CloseConnectionAndThread()
-

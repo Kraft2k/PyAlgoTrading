@@ -9,5 +9,6 @@ if __name__ == '__main__':
     # cash, value = portfolio.get_account_total_value('2007695')
     #print(cash, value)
     #portfolio.close_all_positions()
-    # portfolio.open_positions(["GMKN", ], 1, 45)
+    #portfolio.close_some_positions(["CHMF", ])
+    portfolio.close_all_positions
     portfolio.close_connection()
