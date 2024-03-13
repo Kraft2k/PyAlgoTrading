@@ -1,14 +1,18 @@
-from transaction import Trans2Quik, TransactionUnit
+from transactions import Trans2Quik, TransactionUnit
 
 
 if __name__ == '__main__':
-    cur_accounts = ['1220166', '1311258', '1761021', '1946559', '1988370', '356046', '43816', '63031', ]
+    cur_accounts = ['1946559', '1988370', '356046', '43816', '63031', ]
     my_account = ['108098', ]
-    portfolio = TransactionUnit(my_account)
+    portfolio = TransactionUnit(['1761021', '356046', ])
+    #portfolio = TransactionUnit('TQBR', [''])
     portfolio.quik_api_connect()
-    # cash, value = portfolio.get_account_total_value('2007695')
-    #print(cash, value)
-    #portfolio.close_all_positions()
+
     #portfolio.close_some_positions(["CHMF", ])
-    portfolio.close_all_positions
+    #portfolio.close_some_positions(['PLZL', 'ALRS', ])
+
+    portfolio.close_all_positions()
+
+    #portfolio.open_positions_random_qauntity(['SBER', ], 21, 100)
+
     portfolio.close_connection()

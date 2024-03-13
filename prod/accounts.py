@@ -34,7 +34,7 @@ class GetAccountPosition:
         self.account_cash = 0.0
 
     def get_cash(self):
-        ''' Obtaining the cash position of accounts '''
+        """ Get the cash position of accounts """
         index = 1
         for _account in self.accounts:
             for _account_cash in self.accounts_cash:
@@ -76,7 +76,7 @@ class GetAccountPosition:
             for i in range(len(TablePositions.rows[0]) - len(TablePositions.rows[index_account])): TablePositions.rows[index_account].append(0)
             
     def get_positions(self):
-        """ Getting the quantities of equities for each position of accounts """
+        """ Get the quantities of equities for each position of accounts """
         index_account = 1
         for _account in self.accounts:
             for positions in self.depo_limits:

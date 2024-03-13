@@ -24,10 +24,15 @@ class TableApp(App):
         table.zebra_stripes = True
         table.cursor_type = "column"
 
+accounts = ['108098', '1220166', '1311258', '1411251',
+            '1689321', '1701218', '170743', '1753378',
+            '1761021', '1862020', '1946559', '1988370',
+            '2089746', '224420', '29570', '31753',
+            '321697', '356046', '43816', '63031', '697409', ]
 
 if __name__ == '__main__':
 
-    portfolio = GetAccountPosition() 
+    portfolio = GetAccountPosition('TQBR', accounts) 
     portfolio.get_cash()
     portfolio.build_table_positions()
     portfolio.get_positions()

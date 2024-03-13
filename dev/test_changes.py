@@ -39,8 +39,12 @@ if __name__ == '__main__':
             total_account_value = total_account_value + (positions.get('currentbal') * last_price)
     print(f'Total account value : {total_account_value}')
 
-    portfolio = qp_provider.GetPortfolioInfoEx('NC0058900000','2007695', 2, trans_id=0)['data']
+    
+    portfolio = qp_provider.GetPortfolioInfoEx('NC0058900000','108098', 2, trans_id=0)['data']
     print(portfolio)
     change = portfolio.get('rate_change')
     print(change)
+
+
+
     qp_provider.CloseConnectionAndThread()  # Перед выходом закрываем соединение и поток QuikPy из любого экземпляраm,.
