@@ -115,11 +115,11 @@ class TransactionUnit:
         if seccode == '':
             print('Тикер инструмента не определен!')
         elif operation == '':
-            print('Направление сделки не определено!')
+            print('Направление заявки не определено!')
         elif quantity == 0: 
-            print('Количество лотов сделки не определено!')
+            print('Количество лотов заявки не определено!')
         elif price == 0:
-            print("Цена сделки не определана!")
+            print("Цена заявки не определана!")
         else:
             last_price = float(self.quik_provider.GetParamEx(self.class_code, seccode, 'LAST')['data']['param_value'])
             if price > last_price * (1 + price_threshold) or price < last_price * (1 - price_threshold):
@@ -128,7 +128,6 @@ class TransactionUnit:
 
                 for _account in self.accounts:
                     self.quik_api_send_async_transaction(self.class_code, seccode , _account, operation, quantity , price)
-
 
 
 

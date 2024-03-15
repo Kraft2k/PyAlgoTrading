@@ -17,7 +17,13 @@ class GetAccountPosition:
     def __init__(self, accounts):
         self.qp_provider = QuikPy()  # Calling the QuikPy constructor with a connection to the local host with QUIK
         self.class_code = 'TQBR' # moex equities market
-        #self.accounts = self.qp_provider.GetClientCodes()['data']
+        accounts_from_quik = self.qp_provider.GetClientCodes()['data']
+        for _account in accounts:
+            if accounts_from_quik.count(_account) == 0:
+                print(f'Счет {_account} не найден! Выход из программы')
+                self.qp_provider.CloseConnectionAndThread
+                sys.exit(1)
+
         self.accounts = accounts
         self.is_header_row = True
         self.is_first_account_row = True
@@ -79,7 +85,7 @@ class GetAccountPosition:
             for i in range(len(TablePositions.rows[0]) - len(TablePositions.rows[index_account])): TablePositions.rows[index_account].append(0)
             
     def get_positions(self):
-        """ Get the quantities of equities for each position of accounts """
+        """ Getting8 the quantities of equities for each position of accounts """
         index_account = 1
         for _account in self.accounts:
             for positions in self.depo_limits:
@@ -112,17 +118,21 @@ class GetAccountPosition:
             index_account += 1
 
     def get_portfolios_as_percentage(self):
-        """ Obtaining portfolio positions as a percentage """
+        """ Getting portfolio positions as a percentage """
         index_account = 1
         for _account in self.accounts:
-            total_account_value = TablePositions.rows[index_account][1]
             index_position = 1
             for _position in TablePositions.rows[0][1:(len(TablePositions.rows[0])-2)]: 
                 last_price = float(self.qp_provider.GetParamEx(self.class_code, _position, 'LAST')['data']['param_value'])  # last price
-                if index_position == 1:
-                    position_percentage = float(TablePositions.rows[index_account][index_position]) / float(TablePositions.rows[index_account][(len(TablePositions.rows[0])-2)])*100
+                total_value_account = float(TablePositions.rows[index_account][(len(TablePositions.rows[0])-2)])
+                if total_value_account == 0.0:
+                    print(f'Ошибка: Стоимость портфеля для счета {_account} равна 0.0')
+
                 else:
-                    position_percentage = float((TablePositions.rows[index_account][index_position])) * last_price / float(TablePositions.rows[index_account][(len(TablePositions.rows[0])-2)])*100
+                    if index_position == 1:
+                        position_percentage = float(TablePositions.rows[index_account][index_position]) /  total_value_account * 100
+                    else:
+                        position_percentage = float((TablePositions.rows[index_account][index_position])) * last_price / total_value_account  * 100
                 if position_percentage == 0.0 :
                     TablePositions.rows[index_account][index_position] = str(' ')
                 else:

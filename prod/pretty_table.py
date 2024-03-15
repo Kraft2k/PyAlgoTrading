@@ -12,8 +12,6 @@ portfolio.build_table_positions()
 portfolio.get_positions()
 portfolio.get_portfolios_with_account_value()
 portfolio.get_portfolios_as_percentage()
-
-
 table.field_names = TablePositions.rows[0]
 
 for i in range(1,len(accounts_) + 1):

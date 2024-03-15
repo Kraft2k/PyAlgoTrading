@@ -11,6 +11,7 @@ from rich.text import Text
 from textual.app import App, ComposeResult
 from textual.widgets import DataTable
 
+import sys
 
 model = Model('C:/PyAlgoTrading/prod/vosk-model-small-ru-0.22')
 rec = KaldiRecognizer(model, 16000)
@@ -35,8 +36,10 @@ if __name__ == '__main__':
     cur_accounts = ['1220166', '1311258', '1761021', '1946559', '1988370', '356046', '43816', '63031', ]
     small_accounts = ['29570', '170743', '1411251', '1753378', ]
     shturm_accounts = ['2007693', '2007695',]
-    2
-    portfolio = TransactionUnit(shturm_accounts)
+    
+    accounts = shturm_accounts
+
+    portfolio = TransactionUnit(accounts)
     portfolio.quik_api_connect()
     table = PrettyTable()
     
@@ -48,14 +51,13 @@ if __name__ == '__main__':
         print('')
 
         if text == "привет":
-            print('И Вам не болеть!')
+            print('И Вам не болеть.')
             print('Желаю удачной торговли!')
-
 
         elif text == "показать портфель":
             
             portfolio.close_connection()
-            portfolio_info = GetAccountPosition(shturm_accounts) 
+            portfolio_info = GetAccountPosition(accounts)
             portfolio_info.get_cash()
             portfolio_info.build_table_positions()
             portfolio_info.get_positions()
@@ -72,16 +74,17 @@ if __name__ == '__main__':
             portfolio_info.close_connection()
 
         elif text == 'помощь':
-            print('Формат сообщения для совершения сделки')
+            print('Формат сообщения для подачи заявки')
             print('направление : тикер : цена : количество')
-            print('Примеры сообщений:')
+            print('Примеры сообщений для совершения сделок:')
             print('купить лукойл цена 4300 количество 50')
             print('сбер продать цена 300 количество 100')
             print('')
 
         elif text == 'выход' :
+            print('')
             portfolio.close_connection()
-            quit()
+            sys.exit()
         
         elif 'купи' in text:
             print(command)
