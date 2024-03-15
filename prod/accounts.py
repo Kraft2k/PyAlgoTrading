@@ -14,11 +14,11 @@ class TablePositions():
 class GetAccountPosition:
     """ Get account positions from the moex equities market"""
 
-    def __init__(self):
+    def __init__(self, accounts):
         self.qp_provider = QuikPy()  # Calling the QuikPy constructor with a connection to the local host with QUIK
         self.class_code = 'TQBR' # moex equities market
         #self.accounts = self.qp_provider.GetClientCodes()['data']
-        self.accounts =  ['108098', '1220166', '1311258', '1411251', '1689321', '1701218', '170743', '1753378', '1761021', '1862020', '1946559', '1988370', '2089746', '224420', '29570', '31753', '321697', '356046', '43816', '63031', '697409', ]
+        self.accounts = accounts
         self.is_header_row = True
         self.is_first_account_row = True
 
@@ -32,6 +32,9 @@ class GetAccountPosition:
         self.depo_limits = self.qp_provider.GetAllDepoLimits()['data']
         self.total_account_value = 0.0
         self.account_cash = 0.0
+
+    def __del__(self):
+        print(str(self))
 
     def get_cash(self):
         """ Get the cash position of accounts """
@@ -90,7 +93,7 @@ class GetAccountPosition:
         
         index_account = 1
         for _account in self.accounts:
-            total_account_value = TablePositions.rows[index_account][1]
+            total_account_value = float(TablePositions.rows[index_account][1])
             index_position = 1
             for _position in TablePositions.rows[0][1:]: 
                 last_price = float(self.qp_provider.GetParamEx(self.class_code, _position, 'LAST')['data']['param_value'])  # last price

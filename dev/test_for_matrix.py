@@ -7,7 +7,11 @@ matrix = [ [ 1 ,2, 3],
 ]
 
 print(matrix)
+print(matrix[0])
+
 print(matrix[1][1])
+
+
 
 matrix[1][1] = 0
 print(matrix)

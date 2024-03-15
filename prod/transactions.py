@@ -9,7 +9,9 @@ import os
 import sys
 
 sys.path.insert(1, os.path.join(sys.path[0], "../QuikPy"))
+
 sys.path.insert(1, os.path.join(sys.path[0], "../.."))
+sys.path.insert(1, os.path.join(sys.path[0], ".."))
 
 from QuikPy import QuikPy  # Working with QUIK from Python via QuikSharp LUA scripts
 from backtrader_moexalgo.moexalgo_store import MoexAlgoStore  # Storage AlgoPack
@@ -18,7 +20,7 @@ class Trans2Quik:
 
     LIB_QUIK_API = cdll.LoadLibrary(r"C:\Trans2QuikAPI\trans2quik.dll")
 
-    PATH_2_QUIK = "C:/BCS_Work/QUIK_BCS/"
+    PATH_2_QUIK = "C:/BCS_Shturm/QUIK_BCS/"
     PATH_2_QUIK = str(Path(PATH_2_QUIK)) 
     PATH_2_QUIK = bytes(PATH_2_QUIK,'ascii')
 
@@ -113,15 +115,15 @@ class TransactionUnit:
         if seccode == '':
             print('Тикер инструмента не определен!')
         elif operation == '':
-            print('Направление операции не определено!')
+            print('Направление сделки не определено!')
         elif quantity == 0: 
-            print('Количество лотов операции не определено!')
+            print('Количество лотов сделки не определено!')
         elif price == 0:
-            print("Цена операции не определана!")
+            print("Цена сделки не определана!")
         else:
             last_price = float(self.quik_provider.GetParamEx(self.class_code, seccode, 'LAST')['data']['param_value'])
             if price > last_price * (1 + price_threshold) or price < last_price * (1 - price_threshold):
-                print(f"Значение цены операции находится за пределами диапазона в 2% относительно текущей цены {last_price} инструмента {seccode} ")
+                print(f"Значение цены операции находится за пределами диапазона в {price_threshold * 100}% относительно текущей цены {last_price} инструмента {seccode} ")
             else:
 
                 for _account in self.accounts:
