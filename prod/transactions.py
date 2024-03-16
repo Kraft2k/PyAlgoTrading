@@ -159,7 +159,7 @@ class TransactionUnit:
         list_tickers = []
         for _ticker in tickers:
             list_tickers.append(_ticker)
-        if list_tickers == None:
+        if list_tickers == []:
             print('Список тикеров пуст')
 
         else: 
@@ -185,33 +185,54 @@ class TransactionUnit:
     def open_positions_fix_qauntity(self, tickers, qauntity=1):
         pass
 
+    def close_all_short_positions(self):
+        positions = []
+        for _account in self.accounts:
+            for _position in self.depo_limits:
+                if (_position.get('client_code') == _account and _position.get('limit_kind') == 2 and int(_position.get('currentbal')) < 0):
+                    if positions.count(_position.get('sec_code')) == 0:
+                        positions.append(_position.get('sec_code'))
+
+        print(positions)
+        if positions == []:
+            print(f'Нет открытых коротких позиций для счетов {self.accounts}.')
+        else:
+            info = self.info_tickers(positions, self.ticker_prefix)
+            print(info)
+        
+        for _account in self.accounts:
+                for _position in self.depo_limits:
+
+                    if (_position.get('client_code') == _account and _position.get('limit_kind') == 2 and int(_position.get('currentbal')) < 0):
+                            print(int(_position.get('currentbal')))
+                            last_price = float(self.quik_provider.GetParamEx(self.class_code, _position.get('sec_code'), 'LAST')['data']['param_value'])
+                            quantity = int(( -_position.get('currentbal')) / info[str(self.ticker_prefix + _position.get('sec_code'))]['securities']['LOTSIZE'])
+                            self.quik_api_send_async_transaction(self.class_code, _position.get('sec_code'), _account, 'B', quantity, 34.000)
+                            time.sleep(0.05)
 
 
-
-    def close_all_positions(self):
+    def close_all_long_positions(self):
         
         positions = []
         for _account in self.accounts:
             for _position in self.depo_limits:
                 if (_position.get('client_code') == _account and _position.get('limit_kind') == 2 and int(_position.get('currentbal')) > 0):
-                    positions.append(_position.get('sec_code'))
+                    if positions.count(_position.get('sec_code')) == 0:
+                        positions.append(_position.get('sec_code'))
                                                 
         print(positions)
-        if positions == None:
-            print('Нет открытых позиций для входящих счетов!')
+        if positions == []:
+            print(f'Нет открытых длинных позиций для счетов {self.accounts}.')
         else:
             info = self.info_tickers(positions, self.ticker_prefix)
             for _account in self.accounts:
-                print('acs')
                 for _position in self.depo_limits:
-                    print('pos')
+
                     if (_position.get('client_code') == _account and _position.get('limit_kind') == 2 and int(_position.get('currentbal')) > 0):
-                            print('bal')
-                            if str(_position.get('sec_code') + self.ticker_prefix) in info:
                                 last_price = float(self.quik_provider.GetParamEx(self.class_code, _position.get('sec_code'), 'LAST')['data']['param_value'])
-                                info = self.info_tickers(_position, self.ticker_prefix)
                                 quantity = int(_position.get('currentbal') / info[str(self.ticker_prefix + _position.get('sec_code'))]['securities']['LOTSIZE'])
                                 self.quik_api_send_async_transaction(self.class_code, _position.get('sec_code'), _account, 'S', quantity, last_price)
+                                time.sleep(0.05)
 
     def close_some_positions(self, tickers):
 
