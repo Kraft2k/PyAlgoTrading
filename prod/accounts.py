@@ -21,7 +21,7 @@ class GetAccountPosition:
         for _account in accounts:
             if accounts_from_quik.count(_account) == 0:
                 print(f'Счет {_account} не найден! Выход из программы')
-                self.qp_provider.CloseConnectionAndThread
+                self.qp_provider.CloseConnectionAndThread()
                 sys.exit(1)
 
         self.accounts = accounts
@@ -149,3 +149,4 @@ class GetAccountPosition:
 
     def close_connection(self):
         self.qp_provider.CloseConnectionAndThread()
+        #self.qp_provider.__del__()

@@ -2,7 +2,7 @@ import json, pyaudio
 from vosk import Model, KaldiRecognizer
 
 from transactions import Trans2Quik, TransactionUnit
-from command_analyzer import audio_str_to_quik_str
+#from command_analyzer import audio_str_to_quik_str
 from accounts import GetAccountPosition, TablePositions
 
 from prettytable import PrettyTable
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     big_accounts = ['1220166', '1311258', '1761021', '1946559', '1988370', '321697', '224420', '356046', '43816', '63031', ]
     cur_accounts = ['1220166', '1311258', '1761021', '1946559', '1988370', '356046', '43816', '63031', ]
     small_accounts = ['29570', '170743', '1411251', '1753378', ]
-    shturm_accounts = ['2007695', ]
+    shturm_accounts = ['1220166','1311258']
     
     accounts = shturm_accounts
 
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     for text in listen():
         print(str(text))    
         p = str(text)
-        command = audio_str_to_quik_str(p)
+        #command = audio_str_to_quik_str(p)
         print('')
 
         if text == "привет":
@@ -64,11 +64,13 @@ if __name__ == '__main__':
             print(table)
             print('')
             portfolio_info.close_connection()
+            portfolio = TransactionUnit(accounts)
+            
 
         elif text == 'помощь':
             print('Формат сообщения для подачи заявки')
             print('----------------------------------------')
-            print('направление : тикер : цена : количество')
+            print('направление : тикер : количество : цена')
             print('----------------------------------------')
             print('')
             print('Примеры сообщений для подачи заявок:')
@@ -83,18 +85,27 @@ if __name__ == '__main__':
             portfolio.close_connection()
             sys.exit()
         
-        elif 'купи' in text:
-            print(command)
-            portfolio.command_to_transaction(command)
-            print('')
+        # elif 'купи' in text:
+        #     print(command)
+        #     portfolio.command_to_transaction(command)
+        #     print('')
 
-        elif 'прод' in text:
-            print(command)
-            portfolio.command_to_transaction(command)
-            print('')
+        # elif 'прод' in text:
+        #     print(command)
+        #     portfolio.command_to_transaction(command)
+        #     print('')
+
 
         elif text == 'закрыть':
             portfolio.close_all_short_positions()
+            print('')
+
+        elif text == 'открыть':
+            portfolio.open_long_once_random_qauntity(['OZON', 'SVCB',], 1, 1 )
+
+        elif text == 'шорт':
+            portfolio.open_short_once_random_qauntity(['NVTK',] )
+            print('')
 
         else:
             print('Команда не определена!')

@@ -34,7 +34,7 @@ accounts_ = ['2007693', '2007695', ]
 
 if __name__ == '__main__':
 
-    portfolio = GetAccountPosition(accounts_) 
+    portfolio = GetAccountPosition(accounts) 
     portfolio.get_cash()
     portfolio.build_table_positions()
     portfolio.get_positions()

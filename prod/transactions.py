@@ -20,7 +20,7 @@ class Trans2Quik:
 
     LIB_QUIK_API = cdll.LoadLibrary(r"C:\Trans2QuikAPI\trans2quik.dll")
 
-    PATH_2_QUIK = "C:/BCS_Shturm/QUIK_BCS/"
+    PATH_2_QUIK = "C:/BCS_Work/QUIK_BCS/"
     PATH_2_QUIK = str(Path(PATH_2_QUIK)) 
     PATH_2_QUIK = bytes(PATH_2_QUIK,'ascii')
 
@@ -106,10 +106,12 @@ class TransactionUnit:
 
     def command_to_transaction(self, command):
         """ """
+
         seccode = command[0]
         operation = command[1]
-        price = command [2]
-        quantity = command[3]
+        quantity = command[2]
+        price = float(str(command[3]) + '.' + str(command[4]))
+
         price_threshold = 0.02
 
         if seccode == '':
@@ -154,7 +156,33 @@ class TransactionUnit:
         return cash, total_account_value
 
 
-    def open_positions_random_qauntity(self, tickers, min_qauntity=1, max_quantity=100):
+    def open_long_once_random_qauntity(self, tickers, min_qauntity=1, max_quantity=100):
+        """ Open long position once with random qauntity """
+
+        info = self.info_tickers(tickers, self.ticker_prefix)
+        for _account in self.accounts:
+            cash, total_account_value = self.get_account_total_value(_account)
+            for _ticker in tickers:
+                quantity = random.randint(min_qauntity, max_quantity)
+                last_price = float(self.quik_provider.GetParamEx(self.class_code, _ticker, 'LAST')['data']['param_value'])
+                if (cash > (quantity * last_price)):
+                    self.quik_api_send_async_transaction(self.class_code, _ticker, _account, 'B', quantity, last_price)
+                    time.sleep(0.05)
+
+    def open_short_once_random_qauntity(self, tickers, min_qauntity=1, max_quantity=100):
+        """ Open sshort position once with random qauntity """
+
+        info = self.info_tickers(tickers, self.ticker_prefix)
+        for _account in self.accounts:
+            cash, total_account_value = self.get_account_total_value(_account)
+            for _ticker in tickers:
+                quantity = random.randint(min_qauntity, max_quantity)
+                last_price = float(self.quik_provider.GetParamEx(self.class_code, _ticker, 'LAST')['data']['param_value'])
+                self.quik_api_send_async_transaction(self.class_code, _ticker, _account, 'S', quantity, last_price)
+                time.sleep(0.05)
+
+    def open_long_block(self, tickers, ratio =0.1):
+        """ Open long position once with random qauntity """
 
         list_tickers = []
         for _ticker in tickers:
@@ -162,28 +190,6 @@ class TransactionUnit:
         if list_tickers == []:
             print('Список тикеров пуст')
 
-        else: 
-            info = self.info_tickers(list_tickers, self.ticker_prefix)
-
-            for _account in self.accounts:
-                cash, total_account_value = self.get_account_total_value(_account)
-                for _ticker in tickers:
-                
-                    quantity = random.randint(min_qauntity, max_quantity)
-            
-                    last_price = float(self.quik_provider.GetParamEx(self.class_code, _ticker, 'LAST')['data']['param_value'])
-                    # for position in self.depo_limits:
-                    #     if (position.get('client_code') == _account and position.get('limit_kind') == 2):
-                    #         current_position = position.get('currentbal') * last_price
-                    # print(current_position)
-                    if (cash > (quantity * last_price)):
-
-                        self.quik_api_send_async_transaction(self.class_code, _ticker, _account, 'B', quantity, last_price)
-                        time.sleep(0.05)
-
-
-    def open_positions_fix_qauntity(self, tickers, qauntity=1):
-        pass
 
     def close_all_short_positions(self):
         positions = []
@@ -207,7 +213,7 @@ class TransactionUnit:
                             print(int(_position.get('currentbal')))
                             last_price = float(self.quik_provider.GetParamEx(self.class_code, _position.get('sec_code'), 'LAST')['data']['param_value'])
                             quantity = int(( -_position.get('currentbal')) / info[str(self.ticker_prefix + _position.get('sec_code'))]['securities']['LOTSIZE'])
-                            self.quik_api_send_async_transaction(self.class_code, _position.get('sec_code'), _account, 'B', quantity, 34.000)
+                            self.quik_api_send_async_transaction(self.class_code, _position.get('sec_code'), _account, 'B', quantity, last_price)
                             time.sleep(0.05)
 
 
@@ -234,28 +240,35 @@ class TransactionUnit:
                                 self.quik_api_send_async_transaction(self.class_code, _position.get('sec_code'), _account, 'S', quantity, last_price)
                                 time.sleep(0.05)
 
-    def close_some_positions(self, tickers):
+
+    def close_some_long_positions(self, tickers):
 
         info = self.info_tickers(tickers, self.ticker_prefix)
-        print(info)
-        #print(tickers)
         for _account in self.accounts:      
             for _position in self.depo_limits:
                 print(_position)
-
-                if (_position.get('client_code') == _account and _position.get('limit_kind') == 2 and int(_position.get('currentbal'))> 0):
-                        print('11')
-                        if str(_position.get('sec_code') + self.ticker_prefix) in info:
-
+                if (_position.get('client_code') == _account and _position.get('limit_kind') == 2 and int(_position.get('currentbal'))> 0 and tickers.count(_position.get('sec_code')) > 0):
+                       
                             last_price = float(self.quik_provider.GetParamEx(self.class_code, _position.get('sec_code'), 'LAST')['data']['param_value'])
                             quantity = int(_position.get('currentbal') / info[str(self.ticker_prefix + _position.get('sec_code'))]['securities']['LOTSIZE'])
                             self.quik_api_send_async_transaction(self.class_code, _position.get('sec_code'), _account, 'S', quantity, last_price)
                             time.sleep(0.05)
-                        else:
-                            print('Такого эмитента нет в портфеле')
 
+    def close_some_short_positions(self, tickers):
 
-    def reduce_some_positions(self, tickers):
+        info = self.info_tickers(tickers, self.ticker_prefix)
+        for _account in self.accounts:
+                for _position in self.depo_limits:
+
+                    if (_position.get('client_code') == _account and _position.get('limit_kind') == 2 and int(_position.get('currentbal')) < 0  and tickers.count(_position.get('sec_code')) > 0):
+                            print(int(_position.get('currentbal')))
+                            last_price = float(self.quik_provider.GetParamEx(self.class_code, _position.get('sec_code'), 'LAST')['data']['param_value'])
+                            quantity = int(( -_position.get('currentbal')) / info[str(self.ticker_prefix + _position.get('sec_code'))]['securities']['LOTSIZE'])
+                            self.quik_api_send_async_transaction(self.class_code, _position.get('sec_code'), _account, 'B', quantity, 295.0)
+                            time.sleep(0.05)
+
+    
+    def reduce_some_positions(self, tickers, ratio):
         pass
 
 
@@ -272,6 +285,5 @@ class TransactionUnit:
         val = round(price / step) * step
         return float(("{0:." + str(signs) + "f}").format(val))
 
-        
     def close_connection(self):
         self.quik_provider.CloseConnectionAndThread()
