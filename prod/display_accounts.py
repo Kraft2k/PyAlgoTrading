@@ -30,11 +30,11 @@ accounts = ['108098', '1220166', '1311258', '1411251',
             '2089746', '224420', '29570', '31753',
             '321697', '356046', '43816', '63031', '697409', ]
 
-accounts_ = ['2007693', '2007695', ]
+accounts_ = ['2007693', ]
 
 if __name__ == '__main__':
 
-    portfolio = GetAccountPosition(accounts) 
+    portfolio = GetAccountPosition(accounts_) 
     portfolio.get_cash()
     portfolio.build_table_positions()
     portfolio.get_positions()

@@ -31,7 +31,7 @@ if __name__ == '__main__':
     big_accounts = ['1220166', '1311258', '1761021', '1946559', '1988370', '321697', '224420', '356046', '43816', '63031', ]
     cur_accounts = ['1220166', '1311258', '1761021', '1946559', '1988370', '356046', '43816', '63031', ]
     small_accounts = ['29570', '170743', '1411251', '1753378', ]
-    shturm_accounts = ['1220166','1311258']
+    shturm_accounts = ['2007693',]
     
     accounts = shturm_accounts
 
@@ -96,15 +96,15 @@ if __name__ == '__main__':
         #     print('')
 
 
-        elif text == 'закрыть':
+        elif text == 'закрыть длинные все':
             portfolio.close_all_short_positions()
             print('')
 
-        elif text == 'открыть':
+        elif text == 'открыть длинные':
             portfolio.open_long_once_random_qauntity(['OZON', 'SVCB',], 1, 1 )
 
-        elif text == 'шорт':
-            portfolio.open_short_once_random_qauntity(['NVTK',] )
+        elif text == 'закрыть длинные':
+            portfolio.close_some_long_positions(['NVTK',] )
             print('')
 
         else:

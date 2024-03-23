@@ -8,7 +8,7 @@ from QuikPy import QuikPy  # Working with QUIK from Python via QuikSharp LUA scr
 
 class TablePositions():
 
-    rows = [["account", "cash"], # Header 
+    rows = [["account", "cash"], # Header of table
     ]
 
 class GetAccountPosition:
@@ -17,10 +17,11 @@ class GetAccountPosition:
     def __init__(self, accounts):
         self.qp_provider = QuikPy()  # Calling the QuikPy constructor with a connection to the local host with QUIK
         self.class_code = 'TQBR' # moex equities market
+        
         accounts_from_quik = self.qp_provider.GetClientCodes()['data']
         for _account in accounts:
             if accounts_from_quik.count(_account) == 0:
-                print(f'Счет {_account} не найден! Выход из программы')
+                print(f'Ошибка: cчет {_account} не найден!')
                 self.qp_provider.CloseConnectionAndThread()
                 sys.exit(1)
 
