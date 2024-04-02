@@ -5,6 +5,8 @@ sys.path.insert(1, os.path.join(sys.path[0], "../QuikPy"))
 
 from QuikPy import QuikPy  # Working with QUIK from Python via QuikSharp LUA scripts
 
+import configparser
+
 
 class TablePositions():
 
@@ -14,9 +16,11 @@ class TablePositions():
 class GetAccountPosition:
     """ Get account positions from the moex equities market"""
 
-    def __init__(self, accounts):
+    def __init__(self, accounts, display_alias=False ):
         self.qp_provider = QuikPy()  # Calling the QuikPy constructor with a connection to the local host with QUIK
         self.class_code = 'TQBR' # moex equities market
+
+
         
         accounts_from_quik = self.qp_provider.GetClientCodes()['data']
         for _account in accounts:
@@ -26,14 +30,13 @@ class GetAccountPosition:
                 sys.exit(1)
 
         self.accounts = accounts
-        self.is_header_row = True
-        self.is_first_account_row = True
-
         self.account_positions = {'cash': 0.0}
 
         for _account in self.accounts:
-            next_account_list = [_account]
-            TablePositions.rows.append(next_account_list)
+            if display_alias:
+                TablePositions.rows.append([self.accounts.get(_account)])
+            else:
+                TablePositions.rows.append([_account])
              
         self.accounts_cash = self.qp_provider.GetMoneyLimits()['data']
         self.depo_limits = self.qp_provider.GetAllDepoLimits()['data']
@@ -96,8 +99,9 @@ class GetAccountPosition:
                     TablePositions.rows[index_account][TablePositions.rows[0].index(positions.get('sec_code'))] = int(positions.get('currentbal'))
             index_account += 1
 
+    
     def get_portfolios_with_account_value(self):
-        
+    
         index_account = 1
         for _account in self.accounts:
             total_account_value = float(TablePositions.rows[index_account][1])

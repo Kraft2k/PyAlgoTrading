@@ -19,9 +19,21 @@ if __name__ == '__main__':
     micro_accounts = ['170743', '2089746', '1753378', ]
     nano_accounts = ['29570']
 
-    portfolio = TransactionUnit(big_accounts)
+
+    portfolio = TransactionUnit(big2_accounts)
     portfolio.quik_api_connect()
     #['YNDX','ASTR', 'CHMF', 'OZON', 'SNGSP']
-    portfolio.close_some_long_positions(['CHMF',], 17)
-    #portfolio.close_all_long_positions(7)
+    #(['PLZL', 'SVCB', ]
+    portfolio.open_long_once_random_qauntity(['MTLRP', ], 17, 50, 125)
     portfolio.close_connection()
+
+    
+
+    
+    
+
+   
+
+    
+
+

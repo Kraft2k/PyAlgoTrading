@@ -1,13 +1,42 @@
 import json, pyaudio
 from vosk import Model, KaldiRecognizer
 
+
 from transactions import Trans2Quik, TransactionUnit
 #from command_analyzer import audio_str_to_quik_str
 from accounts import GetAccountPosition, TablePositions
+from messages import CommandMessages
 
+from colorama import Fore, Style
 from prettytable import PrettyTable
 
+
 import sys
+
+alias = {
+        '108098' : 'Kangaroo',
+        '1220166': 'Elephant',
+        '1311258': 'Rhino',
+        '1411251': 'Zebra',
+        '1689321': 'Ant',
+        '1701218': 'Dolphin',
+        '170743' : 'Panda',
+        '1753378': 'Giraffe',
+        '1761021': 'Gorilla',
+        '1862020': 'Whale',
+        '1946559': 'Bear',
+        '1988370': 'Flamingo',
+        '2089746': 'Octopus',
+        '224420' : 'Spider',
+        '29570'  : 'Capybara',
+        '31753'  : 'Giraffe',
+        '321697' : 'Sturgeon',
+        '356046' : 'Pike',
+        '43816'  : 'Turtle',
+        '63031'  : 'Ladybug',
+        '697409' : 'Gudgeon'
+}
+
 
 model = Model('C:/PyAlgoTrading/prod/vosk-model-small-ru-0.22')
 rec = KaldiRecognizer(model, 16000)
@@ -15,6 +44,20 @@ rec = KaldiRecognizer(model, 16000)
 p = pyaudio.PyAudio()
 stream = p.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=8000)
 stream.start_stream()
+
+messages = CommandMessages
+
+big1_accounts = ['1220166', '43816',  ]
+big2_accounts = ['1311258', '1761021', '321697', '356046',]
+big3_accounts = ['1988370', '224420', '63031', '1862020',]
+medium_accounts = ['108098', '2202763', '1946559', '1689321', '31753']
+small_accounts = ['1411251', '1701218', '697409']
+micro_accounts = ['170743', '2089746', '1753378', ]
+nano_accounts = ['29570']
+
+accounts = big1_accounts
+
+portfolio = TransactionUnit('QTBR', accounts)
 
 
 def listen():
@@ -27,32 +70,28 @@ def listen():
 
 
 if __name__ == '__main__':
-    
-    big_accounts = ['1220166', '1311258', '1761021', '1946559', '1988370', '321697', '224420', '356046', '43816', '63031', ]
-    cur_accounts = ['1220166', '1311258', '1761021', '1946559', '1988370', '356046', '43816', '63031', ]
-    small_accounts = ['29570', '170743', '1411251', '1753378', ]
-    shturm_accounts = ['2007693',]
-    
-    accounts = shturm_accounts
-
-    portfolio = TransactionUnit(accounts)
+       
     portfolio.quik_api_connect()
     table = PrettyTable()
-    
+    messages.greetings()
+
     for text in listen():
-        print(str(text))    
-        p = str(text)
-        #command = audio_str_to_quik_str(p)
+         
+        print(f'{Fore.YELLOW}{text}{Style.RESET_ALL}')
+        command_text = str(text)
+    
+        #command = audio_str_to_quik_str(command_text)
         print('')
 
         if text == "привет":
-            print('И Вам не болеть.')
-            print('Желаю удачной торговли!')
-            print('')
+            messages.respond_on_greeting()
 
-        elif text == "показать портфель":
+        elif text == "как дела":
+            messages.respond_on_how_are_you()
+
+        elif text == "показать":
             portfolio.close_connection()
-            portfolio_info = GetAccountPosition(accounts)
+            portfolio_info = GetAccountPosition(accounts )
             portfolio_info.get_cash()
             portfolio_info.build_table_positions()
             portfolio_info.get_positions()
@@ -64,24 +103,14 @@ if __name__ == '__main__':
             print(table)
             print('')
             portfolio_info.close_connection()
-            portfolio = TransactionUnit(accounts)
+            portfolio = TransactionUnit('TQBR', accounts)
             
 
         elif text == 'помощь':
-            print('Формат сообщения для подачи заявки')
-            print('----------------------------------------')
-            print('направление : тикер : количество : цена')
-            print('----------------------------------------')
-            print('')
-            print('Примеры сообщений для подачи заявок:')
-            print('----------------------------------------')
-            print('купить лукойл цена 4300 количество 50')
-            print('сбер продать цена 300 количество 100')
-            print('----------------------------------------')
-            print('')
+            messages.help_list()
 
         elif text == 'выход' :
-            print('')
+            print(f'')
             portfolio.close_connection()
             sys.exit()
         
@@ -96,18 +125,19 @@ if __name__ == '__main__':
         #     print('')
 
 
-        elif text == 'закрыть длинные все':
+        elif text == 'закрыть шорт весь':
             portfolio.close_all_short_positions()
             print('')
 
-        elif text == 'открыть длинные':
-            portfolio.open_long_once_random_qauntity(['OZON', 'SVCB',], 1, 1 )
+        elif text == 'открыть лонг':
+            portfolio.open_long_once_random_qauntity([ 'AFLT',], 5, 3, 200)
 
-        elif text == 'закрыть длинные':
+        elif text == 'закрыть лонг':
             portfolio.close_some_long_positions(['NVTK',] )
+
             print('')
 
         else:
-            print('Команда не определена!')
-            print('')
+            messages.misundestanding()
                 
+        

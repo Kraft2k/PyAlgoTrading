@@ -20,7 +20,7 @@ class Trans2Quik:
 
     LIB_QUIK_API = cdll.LoadLibrary(r"C:\Trans2QuikAPI\trans2quik.dll")
 
-    PATH_2_QUIK = "C:/BCS_Shturm/QUIK_BCS/"
+    PATH_2_QUIK = "C:/BCS_Work/QUIK_BCS/"
     PATH_2_QUIK = str(Path(PATH_2_QUIK)) 
     PATH_2_QUIK = bytes(PATH_2_QUIK,'ascii')
 
@@ -42,10 +42,10 @@ class Trans2Quik:
 
 class TransactionUnit:
     
-    def __init__(self, accounts ):
+    def __init__(self, class_code, accounts ):
         
         self.quik_provider = QuikPy()
-        self.class_code = 'TQBR'
+        self.class_code = class_code
         self.ticker_prefix = self.class_code + '.'
 
         accounts_from_quik = self.quik_provider.GetClientCodes()['data']
@@ -188,37 +188,50 @@ class TransactionUnit:
                 self.quik_api_send_async_transaction(self.class_code, _ticker, _account, 'S', quantity, last_price)
                 time.sleep(delay)
 
-    def open_long_block(self, tickers, ratio=0.1):
+    def open_long_block(self, tickers, percentage=10, max_once_money_size=200000, min_random_delay=10, max_random_delay=60):
         """ Open long position as a block in ratio to the total value account """
 
-        accounts_positions = {}
-        are_filled = False
+
+        positions_are_filled = {}
+        all_are_filled = False
         for _account in self.accounts:
-            accounts_positions[_account] = {}
+           positions_are_filled[_account] = {}
         for _account in self.accounts:
             for _ticker in tickers:
-                accounts_positions[_account][_ticker] = 0
-        for _account in self.accounts:
-            cash, total_account_value = self.get_account_total_value(_account)
+               positions_are_filled[_account][_ticker] = False
         
-        # while not are_filled:
-        for _account in accounts_positions:
-            for _position in self.depo_limits:
+        info = self.info_tickers(tickers, self.ticker_prefix)
+        print(info)
+        while not all_are_filled:
+            for _account in self.accounts:
+                for _position in self.depo_limits:
+                    for _ticker in tickers:
+                        if (_position.get('client_code') == _account and _position.get('limit_kind') == 2 and (_position.get('sec_code')) == _ticker):
+                            if not positions_are_filled[_account][_ticker]:
+                            
+                                cash, total_account_value = self.get_account_total_value(_account)
+                                last_price = float(self.quik_provider.GetParamEx(self.class_code, _ticker, 'LAST')['data']['param_value'])
+                                account_position_value = last_price * int(_position.get('currentbal'))
+                                print(account_position_value)
+                                if account_position_value > (percentage / 100 * total_account_value): 
+                                   positions_are_filled[_account][_ticker] = True
+                                else:
+                                    max_quantity = int((max_once_money_size / (last_price *info[str(self.ticker_prefix + _ticker)]['securities']['LOTSIZE'])))
+            
+                                    #self.open_long_once_random_qauntity(_ticker, 3, 1, max_quantity)
+                                    if cash > max_quantity * last_price:
+                                        self.quik_api_send_async_transaction(self.class_code, _ticker, _account, 'B', random.randint(1, max_quantity), last_price)
+                                    time.sleep(random.randint(min_random_delay, max_random_delay))
+
+            print(positions_are_filled)
+            #if not False in positions_are_filled: all_are_filled = True
+            all_are_filled = True
+            for _account in self.accounts:
                 for _ticker in tickers:
-                    if (_position.get('client_code') == _account and _position.get('limit_kind') == 2 and (_position.get('sec_code')) == _ticker):
-                        accounts_positions[_account][_ticker] = int(_position.get('currentbal'))
-                        #last_price = float(self.qp_provider.GetParamEx(self.class_code, _ticker, 'LAST')['data']['param_value'])  # last price
-                        #print(accounts_positions)
+                    if positions_are_filled[_account][_ticker] == False: all_are_filled = False
 
+            print(all_are_filled)
 
-        print(accounts_positions)
-
-
-
-
-
-    
-       
 
 
     def close_all_short_positions(self, delay=3):
@@ -277,7 +290,6 @@ class TransactionUnit:
         info = self.info_tickers(tickers, self.ticker_prefix)
         for _account in self.accounts:      
             for _position in self.depo_limits:
-                print(_position)
                 if (_position.get('client_code') == _account and _position.get('limit_kind') == 2 and int(_position.get('currentbal'))> 0 and tickers.count(_position.get('sec_code')) > 0):
                        
                             last_price = float(self.quik_provider.GetParamEx(self.class_code, _position.get('sec_code'), 'LAST')['data']['param_value'])
@@ -301,7 +313,6 @@ class TransactionUnit:
     
     def reduce_some_positions(self, tickers, ratio):
         pass
-
 
     
     def format_price(self, ticker, price):
