@@ -5,7 +5,7 @@ engine = pyttsx3.init()
 
 voices = engine.getProperty('voices')
 engine.setProperty('voice', 'ru') 
-engine.setProperty('voice', voices[2].id) 
+engine.setProperty('voice', voices[0].id) 
 engine.setProperty("rate", 210)
 
 #sleep(1)

@@ -97,7 +97,6 @@ class TransactionUnit:
         quantity_string = "QUANTITY=" + str(quantity) + "; "
         price_string = "PRICE=" + str(price) + "; "
         self.transaction_string = self.transaction_string + quantity_string + price_string
-        
         print(self.transaction_string)
 
         FunctionResult = Trans2Quik._TRANS2QUIK_SEND_ASYNC_TRANSACTION(bytes(self.transaction_string,'ascii'),
@@ -109,6 +108,28 @@ class TransactionUnit:
         print("FunctionResult = ", FunctionResult)
         print("ErrorCode =", self.pnExtendedErrorCode.value)
         print("error = ", self.lpstrErrorMessage.value,"\n")
+
+    
+    def kill_all_orders(self, classcode):
+        """ not avalible """
+        self.transaction_string = "ACTION=KILL_ALL_ORDERS; TRANS_ID=777; "
+        classcode_string = "CLASSCODE=" + str(classcode) + "; SECCODE=MGNT" "; "
+        self.transaction_string = self.transaction_string + classcode_string
+        account_string = "ACCOUNT=L01-00000F00; "
+        self.transaction_string = self.transaction_string + account_string
+
+        print(self.transaction_string)
+
+        FunctionResult = Trans2Quik._TRANS2QUIK_SEND_ASYNC_TRANSACTION(bytes(self.transaction_string,'ascii'),
+                                                    ctypes.byref(self.pnExtendedErrorCode), 
+                                                    self.lpstrErrorMessage, 
+                                                    self.dwErrorMessageSize)
+
+        print("send_async_transaction:")
+        print("FunctionResult = ", FunctionResult)
+        print("ErrorCode =", self.pnExtendedErrorCode.value)
+        print("error = ", self.lpstrErrorMessage.value,"\n")
+
 
 
     def command_to_transaction(self, command):
@@ -161,6 +182,9 @@ class TransactionUnit:
                         total_account_value = total_account_value +  int(_position.get('currentbal')) * last_price
 
         return cash, total_account_value
+    
+    
+
 
 
     def open_long_once_random_qauntity(self, tickers, delay=3, min_qauntity=1, max_quantity=100):

@@ -8,8 +8,8 @@ from QuikPy import QuikPy  # Working with QUIK from Python via QuikSharp LUA scr
 import configparser
 
 
-class TablePositions():
-
+class TablePositions:
+    
     rows = [["account", "cash"], # Header of table
     ]
 
@@ -21,7 +21,6 @@ class GetAccountPosition:
         self.class_code = 'TQBR' # moex equities market
 
 
-        
         accounts_from_quik = self.qp_provider.GetClientCodes()['data']
         for _account in accounts:
             if accounts_from_quik.count(_account) == 0:
@@ -43,8 +42,9 @@ class GetAccountPosition:
         self.total_account_value = 0.0
         self.account_cash = 0.0
 
-    def __del__(self):
-        print(str(self))
+    def get_accounts_from_quik(self):
+        accounts_from_quik = self.qp_provider.GetClientCodes()['data']
+        return accounts_from_quik
 
     def get_cash(self):
         """ Get the cash position of accounts """
@@ -154,4 +154,5 @@ class GetAccountPosition:
 
     def close_connection(self):
         self.qp_provider.CloseConnectionAndThread()
-        #self.qp_provider.__del__()
+
+        

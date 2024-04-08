@@ -11,8 +11,17 @@ if __name__ == '__main__':
     config.read('C:/PyAlgoTrading/prod/config/big1_config.ini')
 
 
-    portfolio = TransactionUnit('TQBR', config['accounts'])
+    #portfolio = TransactionUnit('TQBR', config['accounts'])
     print(config.sections())
+ 
+    groups_accounts = [item for item in config.sections() if 'accounts' in item]
+
+    # for i in config.sections():
+    #     if str('accounts') in config.sections():
+    #         list_accounts.append(i)
+
+    print(groups_accounts)
+
     print(config['open_long_block']['tickers'])
 
     content = config['open_long_block']['tickers']
@@ -27,9 +36,10 @@ if __name__ == '__main__':
     tickers = list(map(str, lines))
     print(tickers)
 
-    print(config['open_long_block']['ratio'])
+    print(config['open_long_block']['percentage'])
     # for ticker in config['open_long_block']['tickers']:
     #     print(str(ticker))
-    portfolio.quik_api_connect()
-    portfolio.open_long_block(tickers, 0.1, 100000)
-    portfolio.close_connection()
+    #portfolio.quik_api_connect()
+    #portfolio.kill_all_orders('TQBR')
+    #portfolio.open_long_block(tickers, 10, 300000)
+    #portfolio.close_connection()

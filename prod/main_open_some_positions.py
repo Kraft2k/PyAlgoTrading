@@ -17,14 +17,15 @@ if __name__ == '__main__':
     medium_accounts = ['108098', '2202763', '1946559', '1689321', '31753']
     small_accounts = ['1411251', '1701218', '697409']
     micro_accounts = ['170743', '2089746', '1753378', ]
-    nano_accounts = ['29570']
+    nano_accounts = ['29570', ]
 
+    accounts = big2_accounts
 
-    portfolio = TransactionUnit(big2_accounts)
+    portfolio = TransactionUnit('TQBR', accounts)
     portfolio.quik_api_connect()
     #['YNDX','ASTR', 'CHMF', 'OZON', 'SNGSP']
     #(['PLZL', 'SVCB', ]
-    portfolio.open_long_once_random_qauntity(['MTLRP', ], 17, 50, 125)
+    portfolio.open_long_once_random_qauntity(['GAZP', ], 17, 50, 300)
     portfolio.close_connection()
 
     

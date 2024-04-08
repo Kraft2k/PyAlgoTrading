@@ -7,7 +7,6 @@ from rich.text import Text
 from textual.app import App, ComposeResult
 from textual.widgets import DataTable
 
-
 class TableApp(App):
     """"""
     def compose(self) -> ComposeResult:
